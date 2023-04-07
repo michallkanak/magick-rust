@@ -436,3 +436,51 @@ fn test_import_export_pixels_roundtrip() {
         .zip(pixels.iter())
         .all(|(a, b)| a == b));
 }
+
+#[test]
+fn test_distort_image_right() {
+    START.call_once(|| {
+        magick_wand_genesis();
+    });
+    let mut wand = MagickWand::new();
+    assert!(wand.read_image("tests/data/img_check_for_perspective.png").is_ok());
+    assert_eq!(90, wand.get_image_width());
+    assert_eq!(90, wand.get_image_height());
+
+    wand.distort_image(
+        &[
+            // pkt1 original left top corner x1,y1 - pkt1 distorted x1,y1
+            0.0,0.0,0.0,0.0,
+            // pkt2 original left bottom corner x2,y2 - pkt2 distorted x2,y2
+            0.0,90.0,0.0,90.0,
+            // pkt3 original right top corner x3,y3 - pkt3 distorted x3,y3
+            90.0,0.0,90.0,25.0,
+            // pkt4 original right bottom corner x4,y4 - pkt4 distorted x4,y4
+            90.0,90.0,90.0,65.0
+        ],
+        4, // PerspectiveProjectionDistortion
+        0).unwrap();
+    wand.write_images("tests/data/img_check_for_perspective_result_right.png",false).unwrap();
+}
+
+#[test]
+fn test_distort_image_left() {
+    START.call_once(|| {
+        magick_wand_genesis();
+    });
+    let mut wand = MagickWand::new();
+    assert!(wand.read_image("tests/data/img_check_for_perspective.png").is_ok());
+    assert_eq!(90, wand.get_image_width());
+    assert_eq!(90, wand.get_image_height());
+
+    wand.distort_image(
+        &[
+            0.0,0.0,0.0,25.0,
+            0.0,90.0,0.0,65.0,
+            90.0,0.0,90.0,0.0,
+            90.0,90.0,90.0,90.0
+        ],
+        4, // PerspectiveProjectionDistortion
+        0).unwrap();
+    wand.write_images("tests/data/img_check_for_perspective_result_left.png",false).unwrap();
+}

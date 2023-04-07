@@ -967,6 +967,31 @@ impl MagickWand {
         }
     }
 
+    /// Distort image for given method and args
+    /// See <https://imagemagick.org/api/magick-image.php#MagickDistortImage> for more information.
+    pub fn distort_image(
+        &mut self,
+        distortion_args: &[f64],
+        method: u32,
+        bestfit: u32
+    ) -> Result<()> {
+        let num_args = distortion_args.len() as usize;
+        let args_ptr = distortion_args.as_ptr() as *const bindings::MagickRealType;
+
+        match unsafe {
+            bindings::MagickDistortImage(
+                self.wand,
+                method,
+                num_args,
+                args_ptr,
+                bestfit
+            )
+        } {
+            bindings::MagickBooleanType_MagickTrue => Ok(()),
+            _ => Err(MagickError("DistortImage returned false")),
+        }
+    }
+
     /// Set the wand iterator to the first image.
     /// See <https://imagemagick.org/api/magick-wand.php#MagickSetFirstIterator> for more information.
     pub fn set_first_iterator(&self) {
