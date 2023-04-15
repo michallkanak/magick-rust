@@ -511,13 +511,15 @@ fn test_draw_annotation() {
     dwand.set_stroke_antialias(1);
     dwand.set_text_antialias(1);
     dwand.set_fill_color(&pw);
+    dwand.draw_rotate(45.0);
+
     dwand.draw_annotation(
         100.0,50.0,
         "test test test test"
     ).unwrap();
+
     dwand.draw_circle(30.0,30.0,50.0,50.0);
     dwand.draw_rectangle(70.0,70.0,100.0,100.0);
-
     mwand.draw_image(&dwand).unwrap();
 
     mwand.write_images("tests/data/IMG_5745_draw_annotation.JPG",false).unwrap();

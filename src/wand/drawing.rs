@@ -51,6 +51,12 @@ impl DrawingWand {
         }
     }
 
+    pub fn draw_rotate(&mut self, degrees: f64) {
+        unsafe {
+            bindings::DrawRotate(self.wand, degrees);
+        }
+    }
+
     pub fn draw_rectangle(
         &mut self,
         upper_left_x: f64,
