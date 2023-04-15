@@ -6,7 +6,7 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
     # for debug
-    #volumes:
-    #  - ./../../magick-rust:/usr/src/magick-rust
+#    volumes:
+#      - ./../../magick-rust:/usr/src/magick-rust
     stdin_open: true
     tty: true

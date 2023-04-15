@@ -15,15 +15,18 @@
  */
 
 extern crate magick_rust;
+extern crate libc;
 
 use std::error::Error;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
 use std::sync::Once;
+use libc::exit;
 
-use magick_rust::{bindings, magick_wand_genesis, MagickWand, PixelWand};
+use magick_rust::{bindings, DrawingWand, magick_wand_genesis, MagickWand, PixelWand};
 use magick_rust::{MagickError, ToMagick};
+use magick_rust::magick_query_fonts;
 
 // Used to make sure MagickWand is initialized exactly once. Note that we
 // do not bother shutting down, we simply exit when the tests are done.
@@ -483,4 +486,39 @@ fn test_distort_image_left() {
         4, // PerspectiveProjectionDistortion
         0).unwrap();
     wand.write_images("tests/data/img_check_for_perspective_result_left.png",false).unwrap();
+}
+
+#[test]
+fn test_draw_annotation() {
+    START.call_once(|| {
+        magick_wand_genesis();
+    });
+
+    // let vec = magick_query_fonts("").unwrap();
+    // for x in vec {
+    //     println!("{x}");
+    // }
+
+    let mut mwand = MagickWand::new();
+    assert!(mwand.read_image("tests/data/IMG_5745.JPG").is_ok());
+    let mut dwand = DrawingWand::new();
+    let mut pw = PixelWand::new();
+    pw.set_color("#000000").unwrap();
+
+    dwand.set_font("DejaVu-Sans").unwrap();
+    dwand.set_font_size(24.0);
+
+    dwand.set_stroke_antialias(1);
+    dwand.set_text_antialias(1);
+    dwand.set_fill_color(&pw);
+    dwand.draw_annotation(
+        100.0,50.0,
+        "test test test test"
+    ).unwrap();
+    dwand.draw_circle(30.0,30.0,50.0,50.0);
+    dwand.draw_rectangle(70.0,70.0,100.0,100.0);
+
+    mwand.draw_image(&dwand).unwrap();
+
+    mwand.write_images("tests/data/IMG_5745_draw_annotation.JPG",false).unwrap();
 }
