@@ -992,6 +992,46 @@ impl MagickWand {
         }
     }
 
+    /// Sets the virtual pixel method for the image.
+    /// See <https://imagemagick.org/api/magick-image.php#MagickSetImageVirtualPixelMethod>
+    pub fn set_image_virtual_pixel_method(&mut self, method: u32) -> u32 {
+        unsafe {
+            bindings::MagickSetImageVirtualPixelMethod(self.wand, method)
+        }
+    }
+
+    /// Flood-fill paint image starting at (x, y), replacing connected pixels
+    /// similar to target_color (or the pixel at x,y if target is None) with fill_color.
+    /// See <https://imagemagick.org/api/magick-image.php#MagickFloodfillPaintImage>
+    pub fn floodfill_paint_image(
+        &mut self,
+        fill: &PixelWand,
+        fuzz: f64,
+        target: Option<&PixelWand>,
+        x: isize,
+        y: isize,
+        invert: bool,
+    ) -> Result<()> {
+        let target_ptr = match target {
+            Some(pw) => pw.wand,
+            None => ptr::null(),
+        };
+        match unsafe {
+            bindings::MagickFloodfillPaintImage(
+                self.wand,
+                fill.wand,
+                fuzz,
+                target_ptr,
+                x,
+                y,
+                invert.to_magick(),
+            )
+        } {
+            bindings::MagickBooleanType_MagickTrue => Ok(()),
+            _ => Err(MagickError("FloodfillPaintImage returned false")),
+        }
+    }
+
     /// Set the wand iterator to the first image.
     /// See <https://imagemagick.org/api/magick-wand.php#MagickSetFirstIterator> for more information.
     pub fn set_first_iterator(&self) {
